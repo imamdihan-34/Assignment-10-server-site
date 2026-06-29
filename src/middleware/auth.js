@@ -1,0 +1,42 @@
+const jwt = require('jsonwebtoken');
+
+const verifyToken = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ message: 'Invalid token' });
+      }
+      req.userId = decoded.userId;
+      req.userRole = decoded.role;
+      next();
+    });
+  } catch (error) {
+    res.status(401).json({ message: 'Token verification failed' });
+  }
+};
+
+const verifyAdmin = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.userRole !== 'admin') {
+      return res.status(403).json({ message: 'Access denied. Admin only.' });
+    }
+    next();
+  });
+};
+
+const verifyLawyer = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.userRole !== 'lawyer') {
+      return res.status(403).json({ message: 'Access denied. Lawyer only.' });
+    }
+    next();
+  });
+};
+
+module.exports = { verifyToken, verifyAdmin, verifyLawyer };
