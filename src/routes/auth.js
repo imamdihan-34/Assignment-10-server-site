@@ -14,14 +14,13 @@ router.post(
   authController.register
 );
 
-// Login
+
 router.post(
   '/login',
   validateLogin,
   authController.login
 );
 
-// Google Login
 router.post(
   '/google-login',
   authController.googleLogin

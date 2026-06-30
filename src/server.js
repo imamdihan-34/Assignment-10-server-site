@@ -15,7 +15,7 @@ const lawyerRoutes = require('./routes/lawyer');
 
 const app = express();
 
-// CORS
+
 app.use(cors({
   origin: ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
@@ -23,7 +23,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Middleware
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -42,7 +42,7 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Route not found', path: req.path });
 });
 
-// MongoDB Connection
+
 const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/legalease';
 mongoose.connect(mongoURI)
   .then(() => {
