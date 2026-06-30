@@ -1,18 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const lawyerController = require('../controllers/lawyerController');
+const {
+  getFeaturedLawyers,
+  getTopLawyers,
+  getAllLawyers,
+  getLawyerById
+} = require('../controllers/lawyerController');
 
 // Get all lawyers
-router.get('/all', lawyerController.getAllLawyers);
+router.get('/all', getAllLawyers);
 
 // Get featured lawyers
-router.get('/featured', lawyerController.getFeaturedLawyers);
+router.get('/featured', getFeaturedLawyers);
 
 // Get top lawyers
-router.get('/top', lawyerController.getTopLawyers);
+router.get('/top', getTopLawyers);
 
 // Get lawyer by ID
-router.get('/:id', lawyerController.getLawyerById);
-
+router.get('/:id', getLawyerById);
 
 module.exports = router;
