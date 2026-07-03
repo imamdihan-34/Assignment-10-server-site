@@ -7,13 +7,13 @@ const {
   validateLogin,
 } = require('../middleware/validateRequest');
 
-// Register
-router.post(
-  '/register',
-  validateRegister,
-  authController.register
-);
-
+router.get("/register", (req, res) => {
+  res.json({
+    success: true,
+    message: "GET Register Route Working"
+  });
+});
+router.post("/register", authController.register);
 
 router.post(
   '/login',

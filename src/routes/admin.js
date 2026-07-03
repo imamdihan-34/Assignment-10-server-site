@@ -1,13 +1,52 @@
-const express = require('express');
+const express = require("express");
+
 const router = express.Router();
-const adminController = require('../controllers/adminController');
-const { verifyAdmin } = require('../middleware/auth');
- 
-router.get('/users', verifyAdmin, adminController.getAllUsers);
-router.get('/transactions', verifyAdmin, adminController.getAllTransactions);
-router.get('/analytics', verifyAdmin, adminController.getAnalytics);
- 
-router.put('/user/:userId/role', verifyAdmin, adminController.changeUserRole);
-router.delete('/user/:userId', verifyAdmin, adminController.deleteUser);
- 
+
+const {
+
+    getAllUsers,
+    changeRole,
+    deleteUser,
+    getAnalytics,
+    getAllTransactions,
+
+} = require("../controllers/adminController");
+
+const {
+
+    verifyToken,
+    verifyAdmin,
+
+} = require("../middleware/auth");
+
+router.use(
+    verifyToken,
+    verifyAdmin
+);
+
+router.get(
+    "/users",
+    getAllUsers
+);
+
+router.patch(
+    "/users/:id/role",
+    changeRole
+);
+
+router.delete(
+    "/users/:id",
+    deleteUser
+);
+
+router.get(
+    "/analytics",
+    getAnalytics
+);
+
+router.get(
+    "/transactions",
+    getAllTransactions
+);
+
 module.exports = router;

@@ -1,92 +1,141 @@
-const User = require('../models/User');
-const Lawyer = require('../models/Lawyer');
-const Hiring = require('../models/Hiring');
-const Transaction = require('../models/Transaction');
- 
-const getAllUsers = async (req, res) => {
+const User = require("../models/User");
+const Lawyer = require("../models/Lawyer");
+
+// ================================
+// Get All Users
+// ================================
+exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().sort({ createdAt: -1 });
+
     res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch users', error: error.message });
-  }
-};
- 
-const changeUserRole = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { role } = req.body;
- 
-    if (!['user', 'lawyer', 'admin'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
-    }
- 
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { role },
-      { new: true }
-    ).select('-password');
- 
-    res.json({
-      message: 'Role updated successfully',
-      user
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to change role', error: error.message });
   }
 };
- 
-const deleteUser = async (req, res) => {
+
+// ================================
+// Change User Role
+// ================================
+exports.changeRole = async (req, res) => {
   try {
-    const { userId } = req.params;
- 
-    await User.findByIdAndDelete(userId);
-    await Lawyer.deleteMany({ userId });
-    await Hiring.deleteMany({ userId });
- 
-    res.json({ message: 'User deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to delete user', error: error.message });
+    const { role } = req.body;
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.role = role;
+
+    await user.save();
+
+    res.json({
+      message: "Role Updated Successfully",
+      user,
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
   }
 };
- 
-const getAllTransactions = async (req, res) => {
+
+// ================================
+// Delete User
+// ================================
+exports.deleteUser = async (req, res) => {
+
   try {
-    const transactions = await Transaction.find()
-      .populate('userId', 'email fullName')
-      .populate('lawyerId', 'email fullName')
-      .sort({ createdAt: -1 });
- 
-    res.json(transactions);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch transactions', error: error.message });
+
+    await User.findByIdAndDelete(req.params.id);
+
+    await Lawyer.deleteOne({
+      userId: req.params.id,
+    });
+
+    res.json({
+      message: "User Deleted Successfully",
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
   }
+
 };
- 
-const getAnalytics = async (req, res) => {
+
+// ================================
+// Analytics
+// ================================
+exports.getAnalytics = async (req, res) => {
+
   try {
-    const totalUsers = await User.countDocuments({ role: 'user' });
-    const totalLawyers = await User.countDocuments({ role: 'lawyer' });
-    const totalHires = await Hiring.countDocuments({ status: 'accepted' });
-    const transactions = await Transaction.find({ status: 'completed' });
-    const totalRevenue = transactions.reduce((sum, t) => sum + t.amount, 0);
- 
+
+    const totalUsers = await User.countDocuments({
+      role: "user",
+    });
+
+    const totalLawyers = await User.countDocuments({
+      role: "lawyer",
+    });
+
+    const totalAdmins = await User.countDocuments({
+      role: "admin",
+    });
+
+    const totalServices = await Lawyer.countDocuments();
+
+    const totalPublished = await Lawyer.countDocuments({
+      isPublished: true,
+    });
+
+    const totalHires = await Lawyer.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: {
+            $sum: "$totalHires",
+          },
+        },
+      },
+    ]);
+
     res.json({
       totalUsers,
       totalLawyers,
-      totalHires,
-      totalRevenue
+      totalAdmins,
+      totalServices,
+      totalPublished,
+      totalHires: totalHires[0]?.total || 0,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch analytics', error: error.message });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
   }
+
 };
- 
-module.exports = {
-  getAllUsers,
-  changeUserRole,
-  deleteUser,
-  getAllTransactions,
-  getAnalytics
+
+// ================================
+// Transactions (Temporary)
+// ================================
+exports.getAllTransactions = async (req, res) => {
+
+  res.json([]);
+
 };
- 

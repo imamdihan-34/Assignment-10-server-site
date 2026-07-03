@@ -12,7 +12,9 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const lawyerRoutes = require('./routes/lawyer');
+const adminRoutes = require("./src/routes/adminRoutes");
 
+app.use("/api/admin", adminRoutes);
 const app = express();
 
 

@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "LegalEase Backend API",
   "main": "src/server.js",
+  
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+  "seed": "node seed.js",
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js"
   },
   "keywords": [
     "legal",

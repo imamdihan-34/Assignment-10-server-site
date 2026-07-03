@@ -1,290 +1,200 @@
-const User = require("../models/User");
 const Lawyer = require("../models/Lawyer");
 
-// Get all lawyers
-// Get featured lawyers
-// Get lawyer by ID
-const getFeaturedLawyers = async (req, res) => {
+// ===========================
+// Create Legal Service
+// ===========================
+exports.createService = async (req, res) => {
   try {
-    const dummyLawyers = [
-      {
-        _id: "1",
-        fullName: "John Smith",
-        specialization: "Criminal Law",
-        experience: 15,
-        hourlyRate: 250,
-        bio: "Expert in criminal defense with 15 years of experience.",
-        profilePicture: "https://i.pravatar.cc/150?img=1",
-        isFeatured: true,
-        averageRating: 4.8,
-        totalHirings: 45,
-      },
-      {
-        _id: "2",
-        fullName: "Sarah Johnson",
-        specialization: "Corporate Law",
-        experience: 12,
-        hourlyRate: 300,
-        bio: "Specializes in corporate contracts and M&A.",
-        profilePicture: "https://i.pravatar.cc/150?img=2",
-        isFeatured: true,
-        averageRating: 4.9,
-        totalHirings: 38,
-      },
-      {
-        _id: "3",
-        fullName: "Mike Davis",
-        specialization: "Family Law",
-        experience: 10,
-        hourlyRate: 200,
-        bio: "Handles divorce and custody cases.",
-        profilePicture: "https://i.pravatar.cc/150?img=3",
-        isFeatured: true,
-        averageRating: 4.7,
-        totalHirings: 52,
-      },
-    ];
-    console.log("Login Response =>", {
-      _id: user._id,
-      fullName: user.fullName,
-      email: user.email,
-      role: user.role,
+    const exists = await Lawyer.findOne({
+      userId: req.userId,
     });
 
-    res.json(dummyLawyers);
-  } catch (error) {
-    console.error("Error fetching featured lawyers:", error);
-    res.status(500).json({ message: "Error fetching featured lawyers" });
+    if (exists) {
+      return res.status(400).json({
+        message: "Service already exists",
+      });
+    }
+
+    const lawyer = await Lawyer.create({
+      userId: req.userId,
+      specialization: req.body.specialization,
+      bio: req.body.bio,
+      hourlyRate: req.body.hourlyRate,
+      profilePicture: req.body.profilePicture,
+      status: "available",
+      isPublished: false,
+    });
+
+    res.status(201).json(lawyer);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
-const getTopLawyers = async (req, res) => {
-  try {
-    const dummyLawyers = [
-      {
-        _id: "4",
-        fullName: "Emily Wilson",
-        specialization: "Tax Law",
-        experience: 18,
-        hourlyRate: 350,
-        bio: "Top tax consultant.",
-        profilePicture: "https://i.pravatar.cc/150?img=4",
-        isFeatured: false,
-        averageRating: 5.0,
-        totalHirings: 60,
-      },
-      {
-        _id: "5",
-        fullName: "James Brown",
-        specialization: "Real Estate",
-        experience: 14,
-        hourlyRate: 280,
-        bio: "Real estate legal expert.",
-        profilePicture: "https://i.pravatar.cc/150?img=5",
-        isFeatured: false,
-        averageRating: 4.9,
-        totalHirings: 55,
-      },
-      {
-        _id: "6",
-        fullName: "Lisa Anderson",
-        specialization: "IP Law",
-        experience: 11,
-        hourlyRate: 320,
-        bio: "Intellectual property specialist.",
-        profilePicture: "https://i.pravatar.cc/150?img=6",
-        isFeatured: false,
-        averageRating: 4.8,
-        totalHirings: 42,
-      },
-    ];
+// ===========================
+// My Services
+// ===========================
 
-    res.json(dummyLawyers);
-  } catch (error) {
-    console.error("Error fetching top lawyers:", error);
-    res.status(500).json({ message: "Error fetching top lawyers" });
+exports.getMyServices = async (req, res) => {
+  try {
+    const services = await Lawyer.find({
+      userId: req.userId,
+    }).populate("userId", "fullName email");
+
+    res.json(services);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
-const getAllLawyers = async (req, res) => {
+// ===========================
+// Update Service
+// ===========================
+
+exports.updateService = async (req, res) => {
   try {
-    const dummyLawyers = [
-      {
-        _id: "1",
-        fullName: "John Smith",
-        specialization: "Criminal Law",
-        experience: 15,
-        hourlyRate: 250,
-        bio: "Expert in criminal defense.",
-        profilePicture: "https://i.pravatar.cc/150?img=1",
-        isFeatured: true,
-        averageRating: 4.8,
-        totalHirings: 45,
-      },
-      {
-        _id: "2",
-        fullName: "Sarah Johnson",
-        specialization: "Corporate Law",
-        experience: 12,
-        hourlyRate: 300,
-        bio: "Specializes in corporate contracts.",
-        profilePicture: "https://i.pravatar.cc/150?img=2",
-        isFeatured: true,
-        averageRating: 4.9,
-        totalHirings: 38,
-      },
-      {
-        _id: "3",
-        fullName: "Mike Davis",
-        specialization: "Family Law",
-        experience: 10,
-        hourlyRate: 200,
-        bio: "Handles divorce and custody cases.",
-        profilePicture: "https://i.pravatar.cc/150?img=3",
-        isFeatured: true,
-        averageRating: 4.7,
-        totalHirings: 52,
-      },
-      {
-        _id: "4",
-        fullName: "Emily Wilson",
-        specialization: "Tax Law",
-        experience: 18,
-        hourlyRate: 350,
-        bio: "Top tax consultant.",
-        profilePicture: "https://i.pravatar.cc/150?img=4",
-        isFeatured: false,
-        averageRating: 5.0,
-        totalHirings: 60,
-      },
-      {
-        _id: "5",
-        fullName: "James Brown",
-        specialization: "Real Estate",
-        experience: 14,
-        hourlyRate: 280,
-        bio: "Real estate legal expert.",
-        profilePicture: "https://i.pravatar.cc/150?img=5",
-        isFeatured: false,
-        averageRating: 4.9,
-        totalHirings: 55,
-      },
-      {
-        _id: "6",
-        fullName: "Lisa Anderson",
-        specialization: "IP Law",
-        experience: 11,
-        hourlyRate: 320,
-        bio: "Intellectual property specialist.",
-        profilePicture: "https://i.pravatar.cc/150?img=6",
-        isFeatured: false,
-        averageRating: 4.8,
-        totalHirings: 42,
-      },
-    ];
-
-    res.json(dummyLawyers);
-  } catch (error) {
-    console.error("Error fetching lawyers:", error);
-    res.status(500).json({ message: "Error fetching lawyers" });
-  }
-};
-
-const getLawyerById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const allLawyers = [
-      {
-        _id: "1",
-        fullName: "John Smith",
-        specialization: "Criminal Law",
-        experience: 15,
-        hourlyRate: 250,
-        bio: "Expert in criminal defense.",
-        profilePicture: "https://i.pravatar.cc/150?img=1",
-        isFeatured: true,
-        averageRating: 4.8,
-        totalHirings: 45,
-      },
-      {
-        _id: "2",
-        fullName: "Sarah Johnson",
-        specialization: "Corporate Law",
-        experience: 12,
-        hourlyRate: 300,
-        bio: "Specializes in corporate contracts.",
-        profilePicture: "https://i.pravatar.cc/150?img=2",
-        isFeatured: true,
-        averageRating: 4.9,
-        totalHirings: 38,
-      },
-      {
-        _id: "3",
-        fullName: "Mike Davis",
-        specialization: "Family Law",
-        experience: 10,
-        hourlyRate: 200,
-        bio: "Handles divorce and custody cases.",
-        profilePicture: "https://i.pravatar.cc/150?img=3",
-        isFeatured: true,
-        averageRating: 4.7,
-        totalHirings: 52,
-      },
-      {
-        _id: "4",
-        fullName: "Emily Wilson",
-        specialization: "Tax Law",
-        experience: 18,
-        hourlyRate: 350,
-        bio: "Top tax consultant.",
-        profilePicture: "https://i.pravatar.cc/150?img=4",
-        isFeatured: false,
-        averageRating: 5.0,
-        totalHirings: 60,
-      },
-      {
-        _id: "5",
-        fullName: "James Brown",
-        specialization: "Real Estate",
-        experience: 14,
-        hourlyRate: 280,
-        bio: "Real estate legal expert.",
-        profilePicture: "https://i.pravatar.cc/150?img=5",
-        isFeatured: false,
-        averageRating: 4.9,
-        totalHirings: 55,
-      },
-      {
-        _id: "6",
-        fullName: "Lisa Anderson",
-        specialization: "IP Law",
-        experience: 11,
-        hourlyRate: 320,
-        bio: "Intellectual property specialist.",
-        profilePicture: "https://i.pravatar.cc/150?img=6",
-        isFeatured: false,
-        averageRating: 4.8,
-        totalHirings: 42,
-      },
-    ];
-
-    const lawyer = allLawyers.find((l) => l._id === id);
+    const lawyer = await Lawyer.findOne({
+      _id: req.params.id,
+      userId: req.userId,
+    });
 
     if (!lawyer) {
-      return res.status(404).json({ message: "Lawyer not found" });
+      return res.status(404).json({
+        message: "Service not found",
+      });
+    }
+
+    lawyer.specialization = req.body.specialization;
+    lawyer.bio = req.body.bio;
+    lawyer.hourlyRate = req.body.hourlyRate;
+    lawyer.profilePicture = req.body.profilePicture;
+
+    lawyer.updatedAt = Date.now();
+
+    await lawyer.save();
+
+    res.json({
+      message: "Updated Successfully",
+      lawyer,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===========================
+// Delete Service
+// ===========================
+
+exports.deleteService = async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.userId,
+    });
+
+    if (!lawyer) {
+      return res.status(404).json({
+        message: "Service not found",
+      });
+    }
+
+    res.json({
+      message: "Deleted Successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===========================
+// Featured Lawyers
+// ===========================
+
+exports.getFeaturedLawyers = async (req, res) => {
+  try {
+    const lawyers = await Lawyer.find({
+      isPublished: true,
+    })
+      .populate("userId", "fullName email profilePicture")
+      .limit(6);
+
+    res.json(lawyers);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===========================
+// Top Lawyers
+// ===========================
+
+exports.getTopLawyers = async (req, res) => {
+  try {
+    const lawyers = await Lawyer.find({
+      isPublished: true,
+    })
+      .populate("userId", "fullName email profilePicture")
+      .sort({
+        totalHires: -1,
+      })
+      .limit(3);
+
+    res.json(lawyers);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===========================
+// Browse Lawyers
+// ===========================
+
+exports.getAllLawyers = async (req, res) => {
+  try {
+    const lawyers = await Lawyer.find({
+      isPublished: true,
+    }).populate("userId", "fullName email profilePicture");
+
+    res.json(lawyers);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===========================
+// Lawyer Details
+// ===========================
+
+exports.getLawyerById = async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findById(req.params.id)
+      .populate("userId", "fullName email profilePicture");
+
+    if (!lawyer) {
+      return res.status(404).json({
+        message: "Lawyer not found",
+      });
     }
 
     res.json(lawyer);
-  } catch (error) {
-    console.error("Error fetching lawyer:", error);
-    res.status(500).json({ message: "Error fetching lawyer" });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
-};
-
-module.exports = {
-  getFeaturedLawyers,
-  getTopLawyers,
-  getAllLawyers,
-  getLawyerById,
 };
