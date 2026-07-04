@@ -2,7 +2,7 @@ const path = require("path");
 const dotenv = require("dotenv");
 const dotenvExpand = require("dotenv-expand");
 
-const envPath = path.resolve(__dirname, "../.env");
+require("dotenv").config();
 const envConfig = dotenv.config({ path: envPath });
 dotenvExpand.expand(envConfig);
 
@@ -23,8 +23,12 @@ const commentRoutes = require("./routes/comment");
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:3000",
+      process.env.CLIENT_URL,
+    ],
     credentials: true,
+  
   })
 );
 
