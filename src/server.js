@@ -3,8 +3,6 @@ const dotenv = require("dotenv");
 const dotenvExpand = require("dotenv-expand");
 
 require("dotenv").config();
-const envConfig = dotenv.config({ path: envPath });
-dotenvExpand.expand(envConfig);
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -65,10 +63,12 @@ mongoose
   .catch((err) => console.log(err));
 
 // Start Server
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on ${PORT}`);
-});
+// Start Server (local dev only)
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on ${PORT}`);
+  });
+}
 
 module.exports = app;
