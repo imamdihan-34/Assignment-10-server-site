@@ -1,15 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const hiringController = require('../controllers/hiringController');
-const { verifyToken } = require('../middleware/auth');
- 
-router.post('/create', verifyToken, hiringController.createHiring);
-router.get('/check/:lawyerId', verifyToken, hiringController.checkHiringStatus);
-router.get('/user-history', verifyToken, hiringController.getUserHiringHistory);
-router.get('/lawyer-requests', verifyToken, hiringController.getLawyerHiringRequests);
- 
-router.put('/:id/accept', verifyToken, hiringController.acceptHiring);
-router.put('/:id/reject', verifyToken, hiringController.rejectHiring);
- 
+const { verifyToken,verifyLawyer } = require("../middleware/auth");
+const { createHiring,rejectHiring,acceptHiring,lawyerHistory,userHistory } = require("../controllers/hiringController"); 
+
+router.get("/user", verifyToken, userHistory);
+router.post("/createhiring",verifyToken,createHiring)
+router.get("/lawyer", verifyToken, verifyLawyer, lawyerHistory);
+
+router.patch("/:id/accept", verifyToken, verifyLawyer, acceptHiring);
+
+router.patch("/:id/reject", verifyToken, verifyLawyer, rejectHiring);
+
+
+
 module.exports = router;
- 

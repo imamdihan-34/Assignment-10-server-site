@@ -17,33 +17,9 @@ const {
   verifyLawyer,
 } = require("../middleware/auth");
 
-// ===============================
-// Public Routes
-// ===============================
-
-// Home Featured Lawyers
-router.get("/featured", getFeaturedLawyers);
-
-// Top Lawyers
-router.get("/top", getTopLawyers);
-
-// Browse Lawyers
-router.get("/all", getAllLawyers);
-
-// Single Lawyer Details
-router.get("/:id", getLawyerById);
-
-// ===============================
+// =============================
 // Lawyer Dashboard Routes
-// ===============================
-
-// Get My Service
-router.get(
-  "/my-services",
-  verifyToken,
-  verifyLawyer,
-  getMyServices
-);
+// =============================
 
 // Create Service
 router.post(
@@ -51,6 +27,14 @@ router.post(
   verifyToken,
   verifyLawyer,
   createService
+);
+
+// My Services
+router.get(
+  "/my-services",
+  verifyToken,
+  verifyLawyer,
+  getMyServices
 );
 
 // Update Service
@@ -68,5 +52,21 @@ router.delete(
   verifyLawyer,
   deleteService
 );
+
+// =============================
+// Public Routes
+// =============================
+
+// Featured Lawyers
+router.get("/featured", getFeaturedLawyers);
+
+// Top Lawyers
+router.get("/top", getTopLawyers);
+
+// Browse Lawyers
+router.get("/all", getAllLawyers);
+
+// Lawyer Details
+router.get("/:id", getLawyerById);
 
 module.exports = router;

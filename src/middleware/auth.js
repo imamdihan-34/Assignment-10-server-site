@@ -39,4 +39,8 @@ const verifyLawyer = (req, res, next) => {
   });
 };
 
-module.exports = { verifyToken, verifyAdmin, verifyLawyer };
+module.exports = {
+  verifyToken,
+  verifyAdmin,
+  verifyLawyer,
+};

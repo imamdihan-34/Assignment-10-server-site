@@ -1,145 +1,149 @@
-const Hiring = require('../models/Hiring');
-const Lawyer = require('../models/Lawyer');
- 
-const createHiring = async (req, res) => {
+const Hiring = require("../models/Hiring");
+const Lawyer = require("../models/Lawyer");
+
+// ==========================
+// Create Hiring
+// ==========================
+exports.createHiring = async (req, res) => {
   try {
-    const { lawyerId } = req.body;
-    const userId = req.userId;
- 
-    // Check if already hired
-    const existingHiring = await Hiring.findOne({ userId, lawyerId });
-    if (existingHiring) {
-      return res.status(400).json({ message: 'Already hired this lawyer' });
+    const lawyer = await Lawyer.findById(req.body.lawyerId);
+
+    if (!lawyer) {
+      return res.status(404).json({
+        message: "Lawyer not found",
+      });
     }
- 
-    const hiring = new Hiring({
-      userId,
-      lawyerId,
-      status: 'pending'
+
+    const already = await Hiring.findOne({
+      userId: req.userId,
+      lawyerId: lawyer._id,
+      paymentStatus: "unpaid",
     });
- 
-    await hiring.save();
- 
-    res.status(201).json({
-      message: 'Hiring request sent',
-      hiring
+
+    if (already) {
+      return res.status(400).json({
+        message: "Already Requested",
+      });
+    }
+
+    const hiring = await Hiring.create({
+      userId: req.userId,
+      lawyerId: lawyer._id,
+      fee: lawyer.hourlyRate,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to create hiring', error: error.message });
+
+    res.status(201).json(hiring);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
   }
 };
- 
-const acceptHiring = async (req, res) => {
+
+// ==========================
+// User Hiring History
+// ==========================
+exports.userHistory = async (req, res) => {
   try {
-    const { id } = req.params;
- 
-    const hiring = await Hiring.findByIdAndUpdate(
-      id,
-      { status: 'accepted' },
-      { new: true }
-    );
- 
-    res.json({
-      message: 'Hiring request accepted',
-      hiring
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to accept hiring', error: error.message });
-  }
-};
- 
-const rejectHiring = async (req, res) => {
-  try {
-    const { id } = req.params;
- 
-    const hiring = await Hiring.findByIdAndUpdate(
-      id,
-      { status: 'rejected' },
-      { new: true }
-    );
- 
-    res.json({
-      message: 'Hiring request rejected',
-      hiring
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to reject hiring', error: error.message });
-  }
-};
- 
-const getUserHiringHistory = async (req, res) => {
-  try {
-    const userId = req.userId;
- 
-    const hirings = await Hiring.find({ userId })
+    const hirings = await Hiring.find({
+      userId: req.userId,
+    })
       .populate({
-        path: 'lawyerId',
-        populate: { path: 'userId', select: 'fullName email' },
-        select: 'userId specialization hourlyRate status'
+        path: "lawyerId",
+        populate: {
+          path: "userId",
+          select: "fullName email profilePicture",
+        },
       })
       .sort({ createdAt: -1 });
- 
-    const hiringList = hirings.map(hiring => ({
-      _id: hiring._id,
-      lawyerId: {
-        _id: hiring.lawyerId._id,
-        fullName: hiring.lawyerId.userId.fullName,
-        email: hiring.lawyerId.userId.email,
-        specialization: hiring.lawyerId.specialization,
-        hourlyRate: hiring.lawyerId.hourlyRate,
-        status: hiring.lawyerId.status
-      },
-      status: hiring.status,
-      isPaid: hiring.isPaid,
-      createdAt: hiring.createdAt
-    }));
- 
-    res.json(hiringList);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch hiring history', error: error.message });
-  }
-};
- 
-const getLawyerHiringRequests = async (req, res) => {
-  try {
-    const userId = req.userId;
- 
-    // Get all lawyers of this user
-    const lawyers = await Lawyer.find({ userId });
-    const lawyerIds = lawyers.map(l => l._id);
- 
-    const hirings = await Hiring.find({ lawyerId: { $in: lawyerIds } })
-      .populate('userId', 'fullName email')
-      .populate('lawyerId')
-      .sort({ createdAt: -1 });
- 
+
     res.json(hirings);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch hiring requests', error: error.message });
-  }
-};
- 
-const checkHiringStatus = async (req, res) => {
-  try {
-    const { lawyerId } = req.params;
-    const userId = req.userId;
- 
-    const hiring = await Hiring.findOne({ userId, lawyerId, status: 'accepted' });
- 
-    res.json({
-      hired: !!hiring,
-      hiring
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to check hiring status', error: error.message });
   }
 };
- 
-module.exports = {
-  createHiring,
-  acceptHiring,
-  rejectHiring,
-  getUserHiringHistory,
-  getLawyerHiringRequests,
-  checkHiringStatus
+
+// ==========================
+// Lawyer Hiring History
+// ==========================
+exports.lawyerHistory = async (req, res) => {
+  try {
+    const lawyer = await Lawyer.findOne({
+      userId: req.userId,
+    });
+
+    if (!lawyer) {
+      return res.status(404).json({
+        message: "Lawyer not found",
+      });
+    }
+
+    const hirings = await Hiring.find({
+      lawyerId: lawyer._id,
+    })
+      .populate("userId", "fullName email profilePicture")
+      .sort({ createdAt: -1 });
+
+    res.json(hirings);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ==========================
+// Accept Hiring
+// ==========================
+exports.acceptHiring = async (req, res) => {
+  try {
+    const hiring = await Hiring.findById(req.params.id);
+
+    if (!hiring) {
+      return res.status(404).json({
+        message: "Hiring not found",
+      });
+    }
+
+    hiring.status = "accepted";
+    await hiring.save();
+
+    res.json({
+      message: "Hiring Accepted",
+      hiring,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ==========================
+// Reject Hiring
+// ==========================
+exports.rejectHiring = async (req, res) => {
+  try {
+    const hiring = await Hiring.findById(req.params.id);
+
+    if (!hiring) {
+      return res.status(404).json({
+        message: "Hiring not found",
+      });
+    }
+
+    hiring.status = "rejected";
+    await hiring.save();
+
+    res.json({
+      message: "Hiring Rejected",
+      hiring,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
 };
