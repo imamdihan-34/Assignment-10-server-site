@@ -10,7 +10,7 @@ const {
   getTopLawyers,
   getAllLawyers,
   getLawyerById,
-} = require("../controllers//lawyerController");
+} = require("../controllers/lawyerController");
 
 const {
   verifyToken,
