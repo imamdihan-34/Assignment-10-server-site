@@ -7,7 +7,8 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 const app = express();
 
 // Routes
@@ -55,12 +56,14 @@ app.use((req, res) => {
     message: "Route not found",
   });
 });
-
+console.log(process.env.MONGODB_URI);
 // MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("✅ MongoDB Connected"))
+  
   .catch((err) => console.log(err));
+
 
 // Start Server
 // Start Server (local dev only)
