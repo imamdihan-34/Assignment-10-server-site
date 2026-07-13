@@ -1,3 +1,4 @@
+
 const Lawyer = require("../models/Lawyer");
 
 // ===========================
@@ -164,6 +165,7 @@ exports.getTopLawyers = async (req, res) => {
 
 exports.getAllLawyers = async (req, res) => {
   try {
+    // await connectDB()
     const lawyers = await Lawyer.find({
       isPublished: true,
     }).populate("userId", "fullName email profilePicture");
