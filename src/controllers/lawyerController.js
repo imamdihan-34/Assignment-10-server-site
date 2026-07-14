@@ -1,4 +1,5 @@
-
+ // ✅ ঠিক — .js extension সহ
+const { connectDB } = require("../lib/db");
 const Lawyer = require("../models/Lawyer");
 
 // ===========================
@@ -122,6 +123,7 @@ exports.deleteService = async (req, res) => {
 
 exports.getFeaturedLawyers = async (req, res) => {
   try {
+    await connectDB()
     const lawyers = await Lawyer.find({
       isPublished: true,
     })
@@ -141,7 +143,9 @@ exports.getFeaturedLawyers = async (req, res) => {
 // ===========================
 
 exports.getTopLawyers = async (req, res) => {
+
   try {
+    await connectDB()
     const lawyers = await Lawyer.find({
       isPublished: true,
     })
@@ -165,7 +169,7 @@ exports.getTopLawyers = async (req, res) => {
 
 exports.getAllLawyers = async (req, res) => {
   try {
-    // await connectDB()
+     await connectDB()
     const lawyers = await Lawyer.find({
       isPublished: true,
     }).populate("userId", "fullName email profilePicture");
@@ -183,6 +187,7 @@ exports.getAllLawyers = async (req, res) => {
 // ===========================
 
 exports.getLawyerById = async (req, res) => {
+
   try {
     const lawyer = await Lawyer.findById(req.params.id)
       .populate("userId", "fullName email profilePicture");
